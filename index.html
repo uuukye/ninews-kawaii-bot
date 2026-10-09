@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>ninew's kawaii bot!</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .share-tech-mono-regular {
+            font-family: "Share Tech Mono", monospace;
+            font-weight: 400;
+            font-style: normal;
+        }
+    </style>
+</head>
+
+<body>
+<script>
+let msgs = [];
+let mem = []; 
+let msgY = 400;
+let inp = "";
+let play = 0;
+let hangman = false;
+let waitDay = false;
+let scroll = 0;
+let mob = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+let diff = 0;
+let number = 0;
+let len = 0;
+
+let hangmanSit = [
+    `
+       +======+
+       |      =
+              =
+              =
+              =
+              =
+              =
+              =
+     =============
+
+
+    `
+    ,
+    `
+       +======+
+       |      =
+       _      =
+      ( )     =
+              =
+              =
+              =
+              =
+     =============
+
+
+    `
+    
+    ,
+    `
+       +======+
+       |      =
+       _      =
+      ( )     =
+       |      =
+       |      =
+              =
+              =
+     =============
+
+
+    `
+    
+    ,
+    `
+       +======+
+       |      =
+       _      =
+      ( )     =
+       |      =
+       |      =
+              =
+              =
+     =============
+
+
+    `
+    
+    ,
+
+    `
+       +======+
+       |      =
+       _      =
+      ( )     =
+      /|      =
+     / |      =
+              =
+              =
+     =============
+
+
+    `
+    
+    ,
+    `
+       +======+
+       |      =
+       _      =
+      ( )     =
+      /|l     =
+     / | l    =
+              =
+              =
+     =============
+
+
+    `
+    
+    ,
+    `
+       +======+
+       |      =
+       _      =
+      ( )     =
+      /|l     =
+     / | l    =
+      /       =
+              =
+     =============
+
+
+    `
+
+    ,
+     `
+       +======+
+       |      =
+       _      =
+      ( )     =
+      /|l     =
+     / | l    =
+      / l     =
+              =
+     =============
+
+
+    `
+];
+let hangSit = "";
+
+const firstMsg =
+`heyo! im ninew-chan, a bot made by @ninew, and he is so mean to me :(
+anyways i have three main functions:
+
+-1: just chat with me (i learn from your responses btw)
+-2: hangman word guessing game
+-3: bulls and cows (number guessing game)
+
+oh and btw if you want to delete all of your text in the keyboard, type: '/delete_all'
+
+to continue, say /play(num), 'like /play1' :D`;
+
+
+let easy = [
+    'rocks', 'start', 'feast', 'unique', 'blend', 'smash', 'adore', 'freeze', 'double', 'triple', 'flakes', 'mixed', 'crisp', 'alone', 'armor', 'hack', 'robot', 'phone', 'banana', 'apple', 'pencil', 'donut', 'paper', 'notes', 'wires', 'window', 'pillow', 'record', 'funny', 'medium', 'update', 'badge', 'racoon', 'world', 'school', 'crush', 'eraser', 'potato', 'power', 'hours', 'chips', 'sauce', 'trees', 'squish', 'squash', 'chess', 'stove', 'earth', 'chain', 'power', 'tents', 'coins', 'superb', 'snack', 'photo', 'store', 'stick', 'slice', 'happy', 'fairy', 'cooks', 'pepper', 'spoon', 'police', 'tooth', 'brush', 'drink', 'water', 'frame', 'solder', 'ponds', 'ocean', 'field', 'soccer', 'crate', 'cargo', 'shrink', 'status', 'folder', 'dance', 'class', 'seats', 'words', 'money', 'study', 'learn', 'sushi', 'animal', 'trash', 'stair', 'sleep', 'shirt', 'pants', 'rests', 'rooms', 'bread', 'cloud', 'grass', 'house', 'music', 'train'
+];
+
+let medium = [
+    'notebook', 'innocent', 'advanced', 'podcast', 'preview', 'dissent', 'million', 'cresent', 'ornaments', 'product', 'quotient', 'clueless', 'plastic', 'adorable', 'boiling', 'colorful', 'thousand', 'yourself', 'desktop', 'computer', 'calculus', 'chessboard', 'pencilcase', 'elephant', 'lecture', 'executive', 'principal', 'battery', 'universe', 'pacific', 'exhibit', 'basketball', 'education', 'machine', 'transfer', 'warranty', 'language', 'cellphone', 'textbook', 'project', 'progress', 'software', 'warranty', 'extremely', 'referral', 'exercise', 'sharing', 'region', 'device', 'screen', 'groups', 'wallet', 'airport', 'calendar', 'camera', 'cardboard', 'ceiling', 'climate', 'collect', 'compare', 'complete', 'concert', 'continue', 'creative', 'customer', 'describe', 'discover', 'distance', 'document', 'engine', 'example', 'familiar', 'favorite', 'festival', 'flexible', 'frequent', 'furniture', 'history', 'imagine', 'important', 'industry', 'internet', 'library', 'magazine', 'material', 'measure', 'message', 'method', 'mountain', 'musical', 'occasion', 'official', 'opposite', 'organize', 'paragraph', 'passenger', 'percent', 'personal', 'physical', 'popular', 'possible', 'practice', 'prepare', 'probably'
+];
+
+let hard = [
+    'adaptation', 'recommendation', 'correspondent', 'acknowledgment', 'contribute', 'evaluation', 'postponed', 'achievement', 'certificate', 'mathematics', 'reincarnation', 'recrimination', 'membership', 'management', 'leadership', 'systematic', 'preferences', 'interpretation', 'responsibility', 'perseverance', 'extraordinary', 'investigation', 'contemporary', 'infrastructure', 'transportation', 'phenomenon', 'entrepreneur', 'miscellaneous', 'sophisticated', 'accessibility', 'configuration', 'conservation', 'controversy', 'determination', 'collaboration', 'consequence', 'discrimination', 'encyclopedia', 'exaggeration', 'formulation', 'hypothetical', 'independent', 'intelligence', 'interruption', 'jurisdiction', 'magnificent', 'malfunction', 'negotiation', 'observation', 'opportunity', 'participation', 'prerequisite', 'pronunciation', 'qualification', 'recognition', 'relationship', 'representative', 'significant', 'substantial', 'surveillance', 'temperature', 'terminology', 'unauthorized', 'unfortunately', 'vulnerability', 'architecture', 'biotechnology', 'circumstance', 'compatibility', 'contradiction', 'correspondence', 'credibility', 'decentralization', 'disadvantage', 'effectiveness', 'electromagnetic', 'implementation', 'inconsistency', 'indispensable', 'institution', 'intellectual', 'maintenance', 'methodology', 'organization', 'philosophical', 'preliminary', 'psychological', 'rehabilitation', 'restructuring', 'simultaneous', 'sustainability', 'uncopyrightable'
+];
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    textFont("Share Tech Mono");
+    noStroke();
+
+    if (mob) {
+        noMob();
+        noLoop();
+        return;  
+    }
+
+    t(firstMsg, 12);
+    updMsgY();
+}
+
+function noMob() {
+    background(0);
+    fill(255);
+    textSize(20);
+    textAlign(CENTER, CENTER);
+    text("sorry.. you can't use this on mobile", width / 2, height / 2);
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    if (mob) {
+        noMob();
+        return;
+    }
+    updMsgY();
+}
+
+function draw() {
+    if (mob) return;
+    background(0);
+
+    let totH = msgY + 50;
+    let maxS = max(0, totH - height + 500); 
+    scroll = constrain(scroll, 0, maxS);
+
+    textSize(12);
+    textAlign(LEFT, BASELINE);
+
+    let y = 120 - scroll;
+
+    for (let i = 0; i < msgs.length; i++) {
+        const m = msgs[i];
+
+        if (i % 2 !== 0) fill(40);
+        else fill(20);
+        
+        rect(0, y, width, m.h);
+        fill(255);
+        text(m.msg, 50, y + 30);
+        y += m.h;
+    }
+
+    let kbY = msgY - scroll;
+    fill(40);
+    rect(0, kbY - 30, width, 50);
+
+    fill(255);
+    text(inp, 50, kbY);
+    if ((millis() / 400) % 2 > 1) {
+        text("_", 50 + inp.length * 6.5, kbY);
+    }
+
+    fill(0);
+    rect(0, 0, width, 120);
+
+    textAlign(CENTER, CENTER);
+    fill(255);
+    textSize(20);
+    text("ninew's kawaii bot!", width / 2, 50);
+
+    if (maxS > 0) {
+        let tTop = 120;
+        let tH = height - 120;
+        let thH = max(30, (tH / totH) * tH);
+        let thY = tTop + (scroll / maxS) * (tH - thH);
+        
+        fill(80);
+        rect(width - 15, thY, 10, thH);
+    }
+}
+
+function t(msg, lines) {
+    if (lines === undefined) {
+        lines = msg.split("\n").length;
+    }
+    const h = 50 + (lines - 1) * 12;
+    msgs.push({
+        msg: msg,
+        lines: lines,
+        h: h
+    });
+
+    updMsgY();
+}
+
+function updMsgY() {
+    let tot = 0;
+    for (let m of msgs) tot += m.h;
+    msgY = 120 + tot + 30;
+    
+    if (typeof height !== 'undefined') {
+        scroll = max(0, msgY + 50 - height);
+    }
+}
+
+function getSim(s1, s2) {
+    let l = s1.length, m = s2.length;
+    if (l === 0) return m === 0 ? 1 : 0;
+    let d = Array.from({ length: l + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= m; j++) d[0][j] = j;
+    for (let i = 1; i <= l; i++) {
+        for (let j = 1; j <= m; j++) {
+            let c = s1[i - 1] === s2[j - 1] ? 0 : 1;
+            d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+        }
+    }
+    return 1 - (d[l][m] / Math.max(l, m));
+}
+
+function mouseWheel(event) {
+    if (mob) return;
+    scroll += event.delta;
+}
+
+function keyPressed() {
+    if (mob) return;
+
+    if (keyCode === BACKSPACE) {
+        inp = inp.slice(0, -1);
+    }
+
+    if (keyCode === ENTER && inp.length > 0) {
+        let curInp = inp.toLowerCase();
+
+        if (curInp.includes("/delete_all")) {
+            inp = "";
+            return;
+        }
+
+        if (play === 1) {
+            t(curInp);
+            
+            if (curInp.includes("/back")) {
+                t(firstMsg.toLowerCase(), 12);
+                play = 0;
+                waitDay = false;
+                window.learn = "";
+                window.pendingYesNo = null;
+            } else if (waitDay) {
+                if (/(good|great|fine|well|awesome|happy|yea|yes)/.test(curInp)) {
+                    t("good, good.");
+                } else if (/(bad|sad|awful|terrible|horrible|no)/.test(curInp)) {
+                    t("im sorry.. :(");
+                } else {
+                    t("huh what?");
+                }
+                waitDay = false;
+            } else if (window.learn) {
+                if (curInp.includes("/yes") || curInp.includes("/no")) {
+                    t("you can't use /yes or /no as a learned reply! type a real message.");
+                } else {
+                    mem.push({ trigger: window.learn, response: curInp });
+                    t("okay, i'll remember to say that next time!");
+                    window.learn = "";
+                }
+            } else {
+                let skipSame = false;
+                let isYes = curInp.includes("/yes");
+                let isNo = curInp.includes("/no");
+                let isCmd = isYes || isNo;
+
+                if (window.pendingYesNo) {
+                    if (isYes) {
+                        mem.push({ trigger: window.pendingYesNo.trigger, response: window.pendingYesNo.response });
+                        t("yay, i'll remember that!");
+                        window.pendingYesNo = null;
+                        skipSame = true; 
+                    } else if (isNo) {
+                        t("oh, what should my reply be?");
+                        window.learn = window.pendingYesNo.trigger;
+                        window.pendingYesNo = null;
+                        skipSame = true; 
+                    } else {
+                        mem.push({ trigger: window.pendingYesNo.trigger, response: curInp });
+                        window.pendingYesNo = null;
+                    }
+                }
+
+                if (!skipSame) {
+                    if (isCmd) {
+                        t("there's nothing to say /yes or /no to right now.");
+                    } else {
+                        let best = null;
+                        let maxSim = 0;
+
+                        for (let i = 0; i < mem.length; i++) {
+                            let sim = getSim(mem[i].trigger, curInp);
+                            if (sim >= 0.80 && sim > maxSim) {
+                                maxSim = sim;
+                                best = mem[i];
+                            }
+                        }
+
+                        if (best) {
+                            t(best.response);
+                        } else if (mem.length > 0) {
+                            let rnd = mem[Math.floor(Math.random() * mem.length)].response;
+                            t(rnd);
+                            window.pendingYesNo = { trigger: curInp, response: rnd };
+                        } else {
+                            t("i don't know what to say to that. what should my reply be?");
+                            window.learn = curInp;
+                        }
+                    }
+                }
+            }
+        } else if (play === 2) {
+            t(inp);
+            
+            if (curInp.includes("/back")) {
+                t(firstMsg.toLowerCase(), 12);
+                play = 0;
+                diff = 0;
+                hangman = false;
+                window.targetWord = "";
+                window.guessed = [];
+                window.mistakes = 0;
+            } else if (curInp.includes("/how") || curInp === "how") {
+                t("hangman is a word guessing game!\n\ni will think of a secret word, and you have to guess it one letter at a time.\nif you guess a letter that isn't in the word, you lose a life.\nif you do, that letter will be revealed\n\nyou have 7 lives to figure it out before it's game over!\n\n");
+            } else if (diff === 0) {
+                if (curInp.includes("easy")) {
+                    diff = 1;
+                    t("okay, easy. type anything to start.");
+                } else if (curInp.includes("medium")) {
+                    diff = 2;
+                    t("okay, medium. type anything to start.");
+                } else if (curInp.includes("hard")) {
+                    diff = 3;
+                    t("okay, hard. type anything to start.");
+                } else {
+                    t("huh? i said what difficulty");
+                }
+            } else if (!hangman) {
+                hangman = true;
+                if(diff===1){
+                    list=easy;
+                }else if(diff===2){
+                    list=medium;
+                }else{
+                    list=hard;
+                }
+                window.targetWord = list[Math.floor(Math.random() * list.length)];
+                window.guessed = [];
+                window.mistakes = 0;
+                hangSit = hangmanSit[window.mistakes];
+                let disp = window.targetWord.split("").map(() => "_").join(" ");
+                t("game started! you have 7 lives.\nword: " + disp + "\n\n" + hangSit);
+            } else {
+                if (curInp.length !== 1 || !/[a-z]/.test(curInp)) {
+                    t("please guess a single letter.");
+                } else if (window.guessed.includes(curInp)) {
+                    t("you already guessed that letter.");
+                } else {
+                    window.guessed.push(curInp);
+                    if (!window.targetWord.includes(curInp)) {
+                        window.mistakes++;
+                    }
+                    
+                    hangSit = hangmanSit[window.mistakes];
+                    let disp = window.targetWord.split("").map(l => window.guessed.includes(l) ? l : "_").join(" ");
+                    let lives = 7 - window.mistakes;
+                    
+                    if (!disp.includes("_")) {
+                        t("word: " + disp + "\n\nyayay!!\ngimme the difficulty you want to play to play again or /back to exit.");
+                        hangman = false;
+                        diff = 0;
+                    } else if (lives <= 0) {
+                        t("nooooo you ran out of lives!! the word was: "+window.targetWord+"\n\n" + hangSit + "\n\ngimme the difficulty you want to play to play again or /back to exit.");
+                        hangman = false;
+                        diff = 0;
+                    } else {
+                        t("word: " + disp + "\nlives left: "+lives+"\nguessed: " + window.guessed.join(", ")+"\n\n"+hangSit);
+                    }
+                }
+            }
+        } else if (play === 3) {
+            t(inp);
+
+            if (curInp.includes("/back")) {
+                t(firstMsg.toLowerCase(), 12);
+                play = 0;
+                diff = 0;
+                window.bullsAndCows = false;
+                window.targetNum = "";
+                window.attempts = 0;
+            } else if (curInp.includes("/how") || curInp === "how") {
+                t("you try to guess the multi digit number i came up randomly. all the digits are different. (eg: 1012 is not allowed bc it has two '1's)\n\nafter you put in your guess, i will tell you how many 'bulls' and 'cows' it has.\n\n A bull is a correct digit in the exact correct position.\n\nA cow is a correct digit in the wrong position.\n\nYou use the clues to make another guess.\n\n");
+            } else if (diff === 0) {
+                if (curInp.includes("easy")) {
+                    diff = 1;
+                    t("okay, easy (3 digits). type anything to start.");
+                } else if (curInp.includes("medium")) {
+                    diff = 2;
+                    t("okay, medium (5 digits). type anything to start.");
+                } else if (curInp.includes("hard")) {
+                    diff = 3;
+                    t("okay, hard (7 digits). type anything to start.");
+                } else {
+                    t("huh? i said what difficulty");
+                }
+            } else if (!window.bullsAndCows) {
+                window.bullsAndCows = true;
+                if(diff===1){
+                    len = 3;
+                }else if(diff===2){
+                    len = 5;
+                }else{
+                    len = 7;
+                }
+                window.targetNum = "";
+                let digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+                for (let i = 0; i < len; i++) {
+                    let idx = Math.floor(Math.random() * digits.length);
+                    window.targetNum += digits.splice(idx, 1)[0];
+                }
+                window.attempts = 0;
+                t("game started! guess the "+len+"-digit number.\n(all digits are unique)");
+            } else {
+                if(diff===1){
+                    len = 3;
+                }else if(diff===2){
+                    len = 5;
+                }else{
+                    len = 7;
+                }
+                if (curInp.length !== len || !/^\d+$/.test(curInp)) {
+                    t("please guess a valid " + len + "-digit number.");
+                } else if (new Set(curInp).size !== len) {
+                    t("digits must be unique! try again.");
+                } else {
+                    window.attempts++;
+                    let bulls = 0;
+                    let cows = 0;
+                    for (let i = 0; i < len; i++) {
+                        if (curInp[i] === window.targetNum[i]) {
+                            bulls++;
+                        } else if (window.targetNum.includes(curInp[i])) {
+                            cows++;
+                        }
+                    }
+                    
+                    if (bulls === len) {
+                        t("yayay its right!! it took you "+window.attempts+" attempts.\ntype anything to play again or /back to exit.");
+                        window.bullsAndCows = false;
+                        diff = 0;
+                    } else {
+                        t(bulls + " bulls, " + cows + " cows.\nattempts: " + window.attempts);
+                    }
+                }
+            }
+        } else if (curInp.includes("/play1")) {
+            t(inp);
+            t("hi~! hows your day??\n(say /yes or /no to save my random replies, /back to exit)");
+            play = 1;
+            waitDay = true;
+            window.pendingYesNo = null;
+            window.learn = "";
+        } else if (curInp.includes("/play2")) {
+            t(inp);
+            t("okay lets do hangman! what difficulty? easy, medium, or hard? say 'how' if you want me to explain this game! (type /back to go to the main menu)");
+            play = 2;
+        } else if (curInp.includes("/play3")) {
+            t(inp);
+            t("okay lets do bulls and cows! what difficulty? easy, medium, or hard? say 'how' if you want me to explain this game! (type /back to go to the main menu)");
+            play = 3;
+        } else {
+            t(inp);
+            t("bro i don't see any command");
+        }
+
+        inp = "";
+        updMsgY();
+    }
+}
+
+function keyTyped() {
+    if (mob) return;
+    if (key.length === 1) {
+        inp += key;
+    }
+}
+</script>
+</body>
+</html>
